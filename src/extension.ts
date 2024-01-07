@@ -10,7 +10,7 @@ import { readFileSync } from 'fs'
 import { decorate, setRecentResults } from './decorator'
 
 export async function activate (context: ExtensionContext) {
-	logToChannel('ACTIVATE!')
+	log.info('ACTIVATE!')
 	if (!workspace.workspaceFolders) { return }
 
 	// const debugEnabled = workspace.getConfiguration('ablunit').get('debugEnabled', false)

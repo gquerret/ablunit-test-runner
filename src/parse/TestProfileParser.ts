@@ -4,9 +4,8 @@ import { CoreOptions } from './config/CoreOptions'
 import { IRunProfile, DefaultRunProfile } from './config/RunProfile'
 import { ProfilerOptions } from './config/ProfilerOptions'
 import { CommandOptions } from './config/CommandOptions'
-import { logToChannel } from '../ABLUnitCommon'
+import { readStrippedJsonFile } from '../ABLUnitCommon'
 import { IDatabaseConnection, getProfileDbConns } from './openedgeConfigFile'
-require("jsonminify")
 
 
 const runProfileFilename: string = 'ablunit-test-profile.json'
@@ -18,29 +17,12 @@ export interface IConfigurations {
 	configurations: IRunProfile[]
 }
 
-async function readJson (uri: Uri) {
-	const data = await workspace.fs.readFile(uri).then((raw) => {
-		return JSON.minify(Buffer.from(raw.buffer).toString())
-	}, (err: Error) => {
-		console.error("Failed to parse .vscode/ablunit-test-profile.json: " + err)
-		throw err
-	})
-	return <JSON>JSON.parse(data)
-}
-
-async function getConfigurations (uri: Uri) {
-	return readJson(uri).then((data) => {
-		try {
-			let str = JSON.stringify(data)
-			if (str === '' || str === '{}') {
-				str = '{ "configurations":[] }'
-			}
-			return <IConfigurations>JSON.parse(str)
-		} catch (err) {
-			console.error("Failed to parse ablunit-test-profile: " + err)
-			throw err
-		}
-	})
+function getConfigurations (uri: Uri) {
+	let data = JSON.stringify(readStrippedJsonFile(uri))
+	if (data === '' || data === '{}') {
+		data = '{"configurations":[]}'
+	}
+	return <IConfigurations>JSON.parse(data)
 }
 
 function mergeObjects (from: object, into: object) {
@@ -78,7 +60,7 @@ function getDefaultConfig () {
 	return <IConfigurations> { configurations: [ new DefaultRunProfile ] }
 }
 
-export async function parseRunProfiles (workspaceFolders: WorkspaceFolder[], wsFilename: string = runProfileFilename) {
+export function parseRunProfiles (workspaceFolders: WorkspaceFolder[], wsFilename: string = runProfileFilename) {
 	if (workspaceFolders.length === 0) {
 		throw new Error("Workspace has no open folders")
 	}
@@ -87,28 +69,23 @@ export async function parseRunProfiles (workspaceFolders: WorkspaceFolder[], wsF
 	const runProfiles: IRunProfile[] = []
 	for (const workspaceFolder of workspaceFolders) {
 		console.log("100")
-		const wfConfig = await getConfigurations(Uri.joinPath(workspaceFolder.uri,'.vscode',wsFilename)).then((config) => {
-			if (config.configurations.length === 0) {
-				return { configurations: [] }
-			}
-			return config
-		}, (err: Error) => {
-			logToChannel("Failed to parse ablunit-test-profile.json: " + err, 'warn')
-			return { configurations: [] }
-		})
+		let config = getConfigurations(Uri.joinPath(workspaceFolder.uri,'.vscode',wsFilename))
+		if (config.configurations.length === 0) {
+			config = { configurations: [] }
+		}
 		console.log("101")
-		if (wfConfig.configurations.length === 0) {
+		if (config.configurations.length === 0) {
 			return defaultConfig.configurations
 		}
 
 		for(const dfltProfile of defaultConfig.configurations) {
 			let folderProfile: IRunProfile | undefined = undefined
-			if (wfConfig.configurations.length === 0) {
+			if (config.configurations.length === 0) {
 				folderProfile = undefined
 			} else {
-				folderProfile = wfConfig.configurations.find((profile) => profile.runProfile === dfltProfile.runProfile)
+				folderProfile = config.configurations.find((profile) => profile.runProfile === dfltProfile.runProfile)
 				if (!folderProfile) {
-					folderProfile = wfConfig.configurations[0]
+					folderProfile = config.configurations[0]
 				}
 			}
 
@@ -128,8 +105,8 @@ export async function parseRunProfiles (workspaceFolders: WorkspaceFolder[], wsF
 	return runProfiles
 }
 
-export async function parseRunProfile (workspaceFolder: WorkspaceFolder) {
-	const runProfiles = await parseRunProfiles([workspaceFolder])
+export function parseRunProfile (workspaceFolder: WorkspaceFolder) {
+	const runProfiles = parseRunProfiles([workspaceFolder])
 	return runProfiles[0]
 }
 
@@ -219,7 +196,5 @@ export class RunConfig extends DefaultRunProfile {
 }
 
 export function getProfileConfig (workspaceFolder: WorkspaceFolder) {
-	return parseRunProfile(workspaceFolder).then((prof) => {
-		return new RunConfig(prof, workspaceFolder)
-	})
+	return new RunConfig(parseRunProfile(workspaceFolder),workspaceFolder)
 }

@@ -1,8 +1,6 @@
 import { Uri, workspace, WorkspaceFolder } from 'vscode'
-import { logToChannel } from '../ABLUnitCommon'
+import { logToChannel, readStrippedJsonFile } from '../ABLUnitCommon'
 import { getOpenEdgeProfileConfig, IBuildPathEntry } from './openedgeConfigFile'
-require("jsonminify")
-
 
 interface IRuntime {
 	name: string,
@@ -21,15 +19,10 @@ export interface IProjectJson {
 
 const dlcMap = new Map<WorkspaceFolder, IDlc>()
 
-async function getProjectJson (workspaceFolder: WorkspaceFolder) {
-	const data = await workspace.fs.readFile(Uri.joinPath(workspaceFolder.uri,"openedge-project.json")).then((raw) => {
-		return JSON.minify(Buffer.from(raw.buffer).toString())
-	}, (err) => {
-		logToChannel("Failed to read openedge-project.json: " + err,'error')
-		return undefined
-	})
+function getProjectJson (workspaceFolder: WorkspaceFolder) {
+	const data = readStrippedJsonFile(Uri.joinPath(workspaceFolder.uri,'openedge-project.json'))
 	if (data) {
-		if (!JSON.parse(data)) {
+		if (!data) {
 			logToChannel("Failed to parse openedge-project.json", 'error')
 			return undefined
 		}
@@ -38,14 +31,14 @@ async function getProjectJson (workspaceFolder: WorkspaceFolder) {
 	return undefined
 }
 
-export async function getDLC (workspaceFolder: WorkspaceFolder, projectJson?: string) {
+export function getDLC (workspaceFolder: WorkspaceFolder, projectJson?: string) {
 	const dlc = dlcMap.get(workspaceFolder)
 	if (dlc) {
 		return dlc
 	}
 
 	let runtimeDlc: Uri | undefined = undefined
-	const oeversion = await getOEVersion(workspaceFolder, projectJson)
+	const oeversion = getOEVersion(workspaceFolder, projectJson)
 	const runtimes: IRuntime[] = workspace.getConfiguration("abl.configuration").get("runtimes",[])
 
 	for (const runtime of runtimes) {
@@ -69,7 +62,7 @@ export async function getDLC (workspaceFolder: WorkspaceFolder, projectJson?: st
 	throw new Error("unable to determine DLC")
 }
 
-export async function getOEVersion (workspaceFolder: WorkspaceFolder, projectJson?: string) {
+export function getOEVersion (workspaceFolder: WorkspaceFolder, projectJson?: string) {
 	const profileJson = getOpenEdgeProfileConfig(workspaceFolder.uri)
 	if (!profileJson) {
 		logToChannel("[getOEVersion] profileJson not found", 'debug')
@@ -82,7 +75,7 @@ export async function getOEVersion (workspaceFolder: WorkspaceFolder, projectJso
 	}
 
 	if (!projectJson) {
-		projectJson = await getProjectJson(workspaceFolder)
+		projectJson = JSON.stringify(getProjectJson(workspaceFolder))
 		if (!projectJson) {
 			return undefined
 		}

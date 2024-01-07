@@ -25,7 +25,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-require('jsonminify')
 import * as path from 'path'
 import * as fs from 'fs'
 import { Uri, workspace } from 'vscode'
@@ -170,7 +169,7 @@ function loadConfigFile (filename: string): IOpenEdgeMainConfig {
 	}
 	try {
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-return
-		return JSON.parse(JSON.minify(fs.readFileSync(filename, { encoding: 'utf8' })))
+		return JSON.parse(fs.readFileSync(filename, { encoding: 'utf8' }))
 	} catch (caught) {
 		throw new Error("Failed to parse " + filename + ": " + caught)
 	}
