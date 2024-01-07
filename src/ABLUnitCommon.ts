@@ -2,7 +2,7 @@
 import { TestRun, Uri, window } from 'vscode'
 import path = require('path')
 import * as fs from 'fs'
-// import JSON_minify from 'node-json-minify'
+import JSON_minify from 'node-json-minify'
 
 const logOutputChannel = window.createOutputChannel('ABLUnit', {log: true })
 logOutputChannel.clear()
@@ -74,12 +74,12 @@ export function logToChannel (message: string, consoleMessageType: 'trace' | 've
 	}
 }
 
-// export const readStrippedJsonFile = (uri: Uri | string): JSON => {
-// 	if (typeof uri === 'string') {
-// 		uri = Uri.file(uri)
-// 	}
-// 	const contents = fs.readFileSync(uri.fsPath, 'utf8')
-// 	// eslint-disable-next-line
-// 	const ret: JSON = JSON.parse(JSON_minify(contents))
-// 	return ret
-// }
+export const readStrippedJsonFile = (uri: Uri | string): JSON => {
+	if (typeof uri === 'string') {
+		uri = Uri.file(uri)
+	}
+	const contents = fs.readFileSync(uri.fsPath, 'utf8')
+	// eslint-disable-next-line
+	const ret: JSON = JSON.parse(JSON_minify(contents))
+	return ret
+}
