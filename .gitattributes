@@ -1,6 +1,7 @@
 * text=auto
 *.png binary
 *.sh eol=lf
+.git-hooks/* eol=lf
 .shellcheckrc eol=lf
 
 *.cls linguist-language=OpenEdge-ABL
