@@ -2,6 +2,8 @@ import { strict as assert } from 'assert'
 import { before } from 'mocha'
 import { Uri, workspace } from 'vscode'
 import { doesFileExist, runAllTests, waitForExtensionActive } from '../testCommon'
+import { ABLResults } from '../../ABLResults'
+import { ablunitRun } from '../../ABLUnitRun'
 
 const projName = 'projA'
 
@@ -24,6 +26,11 @@ suite(projName + ' - Extension Test Suite', () => {
 		// await assertResults.passed(1)
 		// await assertResults.errored(0)
 		// await assertResults.failed(0)
+	})
+
+	test(projName + '.2 - call stack', async () => {
+		await runAllTests()
+
 	})
 
 })
