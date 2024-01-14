@@ -3,7 +3,8 @@ import { before } from 'mocha'
 import { Uri, workspace } from 'vscode'
 import { getTestCount, getWorkspaceUri, runAllTests, waitForExtensionActive } from '../testCommon'
 
-const projName = 'proj7'
+// const projName = __filename.split('/').pop()!.replace('.test.ts', '')
+const projName = 'proj7A'
 const workspaceUri = getWorkspaceUri()
 
 function getUri (path: string) {
@@ -39,12 +40,5 @@ suite(projName + ' - Extension Test Suite', () => {
 		const testCount = await getTestCount(resultsJson)
 		assert(testCount > 1000, "testCount should be > 100, but is " + testCount)
 	})
-
-	// test(projName + '.2 - test cancel refresh', () => {
-	// 	// refreshTests()
-	// 	// sleep(50)
-	// 	// cancelRefreshTests()
-	// 	assert.fail("test cancel refresh not implemented")
-	// })
 
 })

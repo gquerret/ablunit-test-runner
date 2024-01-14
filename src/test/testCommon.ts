@@ -2,6 +2,7 @@ import { ConfigurationTarget, FileType, Uri, commands, extensions, workspace } f
 import { ITestSuites } from '../parse/ResultsParser'
 import { strict as assert } from 'assert'
 import { recentResults } from '../decorator'
+import { log } from '../ABLUnitCommon'
 
 export async function waitForExtensionActive () {
 	const ext = extensions.getExtension("kherring.ablunit-test-runner")
@@ -70,8 +71,13 @@ export function sleep (time: number = 2000, msg?: string) {
 	if (msg) {
 		status = status + " [" + msg + "]"
 	}
-	console.log(status)
-	return new Promise(resolve => setTimeout(resolve, time))
+	log.info(status)
+	return new Promise(resolve => setTimeout(resolve, time)).then(() => {
+		log.info("sleep complete")
+	}, (err) => {
+		log.error("sleep failed: " + err)
+		throw err
+	})
 }
 
 export async function doesFileExist (uri: Uri) {

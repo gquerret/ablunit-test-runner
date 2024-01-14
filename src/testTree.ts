@@ -1,4 +1,4 @@
-import { CancellationToken, Range, TestController, TestItem, TestRun, TestTag, Uri, workspace } from 'vscode'
+import { CancellationError, CancellationToken, Range, TestController, TestItem, TestRun, TestTag, Uri, workspace } from 'vscode'
 import { ABLResults } from './ABLResults'
 import { ITestSuite, parseABLTestSuite } from './parse/TestSuiteParser'
 import { IClassRet, ITestCase, parseABLTestClass } from './parse/TestClassParser'
@@ -111,10 +111,23 @@ export class ABLTestFile extends TestTypeObj {
 	public children: ABLTestCase[] = []
 	public cancelled: boolean = false
 
-	public async updateFromDisk (controller: TestController, item: TestItem, isCancelled?: () => boolean, token?: CancellationToken) {
-		log.debug("updateFromDisk: " + item.id + " " + this.cancelled + " " + token?.isCancellationRequested)
+	public async updateFromDisk (controller: TestController, item: TestItem, token?: CancellationToken) {
+		log.trace(item.id + " " + this.cancelled + " " + token?.isCancellationRequested)
+
+		if (token) {
+			token?.onCancellationRequested(() => {
+				// this.cancelled = true
+				log.warn('(1) cancellation requested while parsing ' + item.id + '. set this.cancelled = true')
+				throw new CancellationError()
+			})
+			if (token.isCancellationRequested) {
+				log.warn('(2) cancellation request detected while parsing ' + item.id)
+				throw new CancellationError()
+			}
+		}
 		if (this.cancelled) {
-			throw new Error("cancellation detected. skpping updateFromDisk for " + item.id)
+			log.warn('(3) cancellation request detected while parsing ' + item.id)
+			throw new CancellationError()
 		}
 
 		return getContentFromFilesystem(item.uri!).then((content) => {
@@ -143,7 +156,7 @@ export class ABLTestFile extends TestTypeObj {
 
 	startParsing (item: TestItem) {
 		this.relativePath = workspace.asRelativePath(item.uri!.fsPath)
-		log.debug("parsing test file " + this.relativePath + " as " + this.description)
+		log.trace("parsing test file " + this.relativePath + " as " + this.description)
 		this.didResolve = true
 		item.tags = [new TestTag("runnable"), new TestTag(this.description)]
 		item.description = this.description

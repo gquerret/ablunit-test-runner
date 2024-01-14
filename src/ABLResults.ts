@@ -1,4 +1,4 @@
-import { CancellationToken, Disposable, FileType, MarkdownString, Range, TestItem, TestItemCollection, TestMessage, TestRun, Uri, workspace, WorkspaceFolder } from 'vscode'
+import { CancellationError, CancellationToken, Disposable, FileType, MarkdownString, Range, TestItem, TestItemCollection, TestMessage, TestRun, Uri, workspace, WorkspaceFolder } from 'vscode'
 import { ABLUnitConfig } from './ABLUnitConfigWriter'
 import { ABLResultsParser, ITestCaseFailure, ITestCase, ITestSuite } from './parse/ResultsParser'
 import { ABLTestSuite, ABLTestData } from './testTree'
@@ -63,7 +63,8 @@ export class ABLResults implements Disposable {
 		log.info("workspaceFolder=" + workspaceFolder.uri.fsPath)
 		if(cancellation) {
 			cancellation.onCancellationRequested(() => {
-				log.info("[ABLResults] test run cancellation detected")
+				log.info("cancellation requested")
+				throw new CancellationError()
 			})
 		}
 		this.startTime = new Date()
