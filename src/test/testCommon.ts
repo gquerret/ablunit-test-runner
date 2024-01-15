@@ -1,6 +1,6 @@
 import { ConfigurationTarget, FileType, Uri, commands, extensions, workspace } from 'vscode'
 import { ITestSuites } from '../parse/ResultsParser'
-import { strict as assert } from 'assert'
+import  assert = require('assert')
 import { recentResults } from '../decorator'
 import { log } from '../ABLUnitCommon'
 
@@ -72,12 +72,13 @@ export function sleep (time: number = 2000, msg?: string) {
 		status = status + " [" + msg + "]"
 	}
 	log.info(status)
-	return new Promise(resolve => setTimeout(resolve, time)).then(() => {
-		log.info("sleep complete")
-	}, (err) => {
-		log.error("sleep failed: " + err)
-		throw err
-	})
+	return new Promise(resolve => setTimeout(resolve, time))
+	// return new Promise(resolve => setTimeout(resolve, time)).then(() => {
+	// 	log.info("sleep complete")
+	// }, (err) => {
+	// 	log.error("sleep failed: " + err)
+	// 	throw err
+	// })
 }
 
 export async function doesFileExist (uri: Uri) {
@@ -153,7 +154,7 @@ async function installOpenedgeABLExtension () {
 	console.log("[indexCommon.ts] activating riversidesoftware.openedge-abl-lsp extension")
 	await extensions.getExtension("riversidesoftware.openedge-abl-lsp")?.activate()
 	while(!extensions.getExtension("riversidesoftware.openedge-abl-lsp")?.isActive) {
-		console.log(extensions.getExtension("riversidesoftware.openedge-abl-lsp") + " " + extensions.getExtension("riversidesoftware.openedge-abl-lsp")?.isActive)
+		console.log("openedge-abl active? " + extensions.getExtension("riversidesoftware.openedge-abl-lsp")?.isActive)
 		await sleep(500)
 	}
 	console.log("openedge-abl active? " + !extensions.getExtension("riversidesoftware.openedge-abl-lsp")?.isActive)

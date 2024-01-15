@@ -15,5 +15,6 @@
 	},
 	"sonarlint.disableTelemetry": true,
 	"tslint.enable": false, // this project uses eslint
+	"typescript.validate.enable": false,
 	"typescript.preferences.quoteStyle": "single"
 }

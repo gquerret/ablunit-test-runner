@@ -6,8 +6,41 @@
 import { getTestConfig } from './createTestConfig'
 import { GlobSync } from 'glob'
 import { workspace } from 'vscode'
-import Mocha = require('mocha')
-import * as path from 'path'
+// import { path } from 'path'
+// import Mocha = require('mocha')
+import Mocha = require('../../node_modules/mocha/lib/mocha.js')
+
+Mocha.reporters.Base.useColors = true
+
+import path = require('path')
+
+// runtime error - TypeError: Cannot read properties of undefined (reading 'mocha')
+// require('mocha')
+
+// warning
+// const { Mocha } = require('mocha')
+
+// compile error
+// const Mocha = require('mocha')
+
+// runtime failure
+// import Mocha = require('mocha')
+// import Mocha from 'mocha'
+// import Mocha from 'mocha'
+// import * as Mocha from
+// import Mocha from '../../node_modules/mocha/lib/mocha.js'
+// import Mocha from '../../node_modules/mocha/lib/mocha'
+// import 'mocha'
+
+// runtime failure
+// import * as Mocha from 'mocha'
+
+// compile error -  Module '"mocha"' has no default export.
+// import { Mocha } from 'mocha'
+
+// compile error
+// import Mocha as Mocha from 'mocha'
+
 const NYC = require('nyc')
 
 function setupNyc (projName: string) {
@@ -52,7 +85,7 @@ function setupNyc (projName: string) {
 }
 
 function setupMocha (projName: string, timeout: number) {
-	return new Mocha({
+	return new Mocha ({
 		color: true,
 		ui: "tdd",
 		timeout: timeout,
@@ -81,7 +114,7 @@ function runTestsForProject (projName: string, timeout: number) {
 
 		try {
 			// Run the mocha test
-			mocha.run((failures) => {
+			mocha.run((failures: number) => {
 				if (failures > 0) {
 					console.log(`${failures} tests failed.`)
 					e(new Error(`${failures} tests failed.`))

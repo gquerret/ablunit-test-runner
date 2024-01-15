@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 import { LogLevel, TestRun, Uri, window } from 'vscode'
 import path = require('path')
+// import fs = require('fs')
 import * as fs from 'fs'
 // @ts-expect-error 123
 import JSON_minify from 'node-json-minify'

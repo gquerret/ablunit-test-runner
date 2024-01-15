@@ -3,12 +3,14 @@ set -eou pipefail
 
 usage () {
 	echo "
-usage: $0 [ -o 12.2.12 | 12.7.0 ] [-b] [-d] [-i] [-s] [-h]
+usage: $0 [ -o 12.2.12 | 12.7.0 ] [-b] [-d] [-i] [-m] [-s] [-h]
 options:
   -o <version>  OE version (default: 12.2.12)
   -b            drop to bash shell inside container on failure
   -d            run development test
   -i            run install and run test
+  -m            copy local files that are modified but not staged
+  -s            copy local files which are staged (enabled by default)
   -p            run esbuild-bundle instead of build
   -s            run staged tests only
   -h            show this help message and exit
@@ -20,16 +22,17 @@ initialize () {
 	OPTS=
 	SCRIPT=entrypoint
 	TEST_PROJECT=base
-	STAGED_ONLY=false
+	STAGED_ONLY=true
 	OE_VERSION=12.2.12
 	RUNCMD='build'
 
-	while getopts "bdipso:h" OPT; do
+	while getopts "bdipmso:h" OPT; do
 		case $OPT in
 			o) 	OE_VERSION=$OPTARG ;;
 			b)	OPTS='-b' ;;
 			d)	SCRIPT=development_test ;;
 			i)	TEST_PROJECT=dummy-ext ;;
+			m)  STAGED_ONLY=false ;;
 			p)	RUNCMD='esbuild-bundle' ;;
 			s)	STAGED_ONLY=true ;;
 			h) 	usage && exit 0 ;;

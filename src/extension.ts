@@ -5,8 +5,9 @@ import { commands, tests, window, workspace,
 import { ABLResults } from './ABLResults'
 import { ABLTestSuite, ABLTestClass, ABLTestProgram, ABLTestFile, ABLTestCase, ABLTestDir, ABLTestData, resultData, testData } from './testTree'
 import { GlobSync } from 'glob'
+
 import { log } from './ABLUnitCommon'
-import { readFileSync } from 'fs'
+import * as fs from 'fs'
 import { decorate, setRecentResults } from './decorator'
 
 export async function activate (context: ExtensionContext) {
@@ -497,7 +498,7 @@ function getTestFileAttrs (file: Uri) {
 	const testRegex = /@test/i
 	const suiteRegex = /@testsuite/i
 
-	const contents = readFileSync(file.fsPath).toString()
+	const contents = fs.readFileSync(file.fsPath).toString()
 	if (!contents || contents.length < 1 || !testRegex.test(contents)) {
 		return 'none'
 	}

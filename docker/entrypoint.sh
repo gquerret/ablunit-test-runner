@@ -28,9 +28,8 @@ initialize () {
 
 	echo 'copying files from local'
 	initialize_repo
-	copy_files_from_volume
 	restore_cache
-	npm install
+	copy_files_from_volume
 }
 
 initialize_repo () {
@@ -39,7 +38,9 @@ initialize_repo () {
 	cd /home/circleci/project
 	git config --global init.defaultBranch main
 	git init
-	git remote add origin "$REPO_VOLUME"
+	if ! $(git remote | grep -q origin); then
+		git remote add origin "$REPO_VOLUME"
+	fi
 	git fetch origin
 	if [ "$GIT_BRANCH" = "$(git branch --show-current)" ]; then
 		git reset --hard "origin/$GIT_BRANCH"
@@ -64,13 +65,15 @@ find_files_to_copy () {
 	local BASE_DIR
 	BASE_DIR=$(pwd)
 
+	set -x
 	cd "$REPO_VOLUME"
 	git config --global --add safe.directory "$REPO_VOLUME"
 	git --no-pager diff --diff-filter=d --name-only --staged --ignore-cr-at-eol > /tmp/staged_files
 	git --no-pager diff --diff-filter=D --name-only --staged --ignore-cr-at-eol > /tmp/deleted_files
-	if ! ${STAGED_ONLY:-false}; then
+	if ! ${STAGED_ONLY:-true}; then
 		git --no-pager diff --diff-filter=d --name-only --ignore-cr-at-eol > /tmp/modified_files
 	fi
+	set +x
 
 	echo "file counts:"
 	echo "  staged=$(wc -l /tmp/staged_files)"
@@ -168,7 +171,7 @@ run_packaged_tests () {
 	cd dummy-ext
 	npm run compile
 	export DONT_PROMPT_WSL_INSTALL=No_Prompt_please
-	if ! xvfb-run -a npm run test:install-and-run; then
+	if ! xvfb-run -a npm run test:install-and-run -NEW_VALUE=ken; then
 		$BASH_AFTER && bash
 		exit 1
 	fi
@@ -186,10 +189,10 @@ save_cache () {
 		mkdir -p "$CACHE_BASE/.vscode-test"
 		rsync -aR ./.vscode-test "$CACHE_BASE"
 	fi
-	if [ -d dummy-ext/.vscode-test ]; then
-		mkdir -p "$CACHE_BASE/dummy-ext/.vscode-test"
-		rsync -aR ./dummy-ext/.vscode-test "$CACHE_BASE"
-	fi
+	# if [ -d dummy-ext/.vscode-test ]; then
+	# 	mkdir -p "$CACHE_BASE/dummy-ext/.vscode-test"
+	# 	rsync -aR ./dummy-ext/.vscode-test "$CACHE_BASE"
+	# fi
 }
 
 restore_cache () {
@@ -198,11 +201,17 @@ restore_cache () {
 	BASE_DIR=$(pwd)
 
 	cd "$CACHE_BASE"
-	if [ -d "$CACHE_BASE/.vscode-test" ]; then
-		rsync -aR .vscode-test "$BASE_DIR"
+	if [ "$TEST_PROJECT" = "base" ]; then
+		if [ -d "$CACHE_BASE/.vscode-test" ]; then
+			echo 'restoring .vscode-test from cache'
+			rsync -aRv .vscode-test "$BASE_DIR"
+		fi
 	fi
-	if [ -d "$CACHE_BASE/dummy-ext/.vscode-test" ]; then
-		rsync -aR dummy-ext/.vscode-test "$BASE_DIR"
+	if [ "$TEST_PROJECT" = "dummy-ext" ]; then
+		if [ -d "$CACHE_BASE/dummy-ext/.vscode-test" ]; then
+			echo 'restoring dummy-ext/.vscode-test from cache'
+			rsync -aRv dummy-ext/.vscode-test "$BASE_DIR"
+		fi
 	fi
 	cd -
 }

@@ -36,3 +36,21 @@ All pull requests must have corresponding tests and appropriate test coverage.  
 	docker/docker_build.sh # run once to build the container
 	docker/run_tests.sh # run each time you want the tests to execute
 	```
+
+
+```
+rm -rf out
+npm run build
+echo "compile $(find out -name '*.js' | wc -l) files"
+npm run test
+```
+
+```
+	"vscode:prepublish-2": "npm run esbuild-base -- --minify",
+	"esbuild-base": "esbuild ./src/extension.ts --outdir=out --format=cjs --platform=node",
+	"esbuild": "npm run esbuild-base -- --sourcemap --outdir=pit --format=cjs --platform=node",
+	"esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
+	"esbuild-bundle-new": "npm run esbuild-base -- --minify --bundle --external:vscode",
+	"test-compile": "tsc -p ./"
+},
+````

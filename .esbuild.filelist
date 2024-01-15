@@ -1,0 +1,3 @@
+./src/extension.ts
+./src/test/index.ts
+./src/test/runBuild.ts

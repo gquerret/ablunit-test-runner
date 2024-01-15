@@ -1,0 +1,10 @@
+{
+	"entryPoints": [ "./src/extension.ts" ],
+	"bundle": false,
+	"platform": "node",
+	"outdir": "out",
+	"sourcemap": true,
+	"format": "cjs",
+	"target": "node",
+	"external": ["vscode"]
+}

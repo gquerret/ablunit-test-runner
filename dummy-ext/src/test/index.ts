@@ -1,5 +1,5 @@
-import * as path from "path"
-import * as Mocha from "mocha"
+import * as path from 'path'
+const Mocha = require('mocha')
 
 function setupMocha(projName: string, timeout: number) {
 	return new Mocha({
@@ -23,7 +23,7 @@ export function run(): Promise <void> {
 		mocha.addFile(path.resolve(testsRoot, './test/installAndRun.test.js'))
 		try {
 			// Run the mocha test
-			mocha.run(async (failures) => {
+			mocha.run(async (failures: number) => {
 				if (failures > 0) {
 					console.log(`${failures} tests failed.`)
 					e(new Error(`${failures} tests failed.`))

@@ -17,7 +17,9 @@
 			},
 			"runOptions": {
 				"runOn": "folderOpen"
-			}
+			},
+			"label": "npm: watch",
+			"detail": "npm run esbuild-base -- --watch"
 		},
 		{
 			"label": "run unit tests in docker",

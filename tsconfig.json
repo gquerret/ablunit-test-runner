@@ -1,28 +1,79 @@
 {
-	"compilerOptions": {
-		"module": "commonjs",
-		"target": "ES2019",
-		"lib": [
-			"ES2019"
-		],
-		"outDir": "out",
-		"sourceMap": true,
-		"strict": true,
-		"rootDir": "src"
-	},
-	"parseOptions": {
-		"project": "tsconfig.json",
-		"tsconfigRootDir": "."
-	},
-	"include": [
-		"src/**/*.ts",
-		"src/*.ts",
-		"src/*/*.ts",
-		"src/*/*/*.ts",
-		"src/*/*/*/*.ts"
-	],
-	"exclude": [
-		"node_modules",
-		"out"
-	]
+    "compilerOptions": {
+        // accepted by esbuild
+        "experimentalDecorators": true,
+        "strict": true, // only enable if using ESM
+        "alwaysStrict": true,
+        // "verbatimModuleSyntax": true,
+        // "importsNotUsedAsValues": "preserve",
+        // "preserveValueImports": true,
+
+        // may be required for esbuild to work properly
+        // "noEmit": true,   // https://esbuild.github.io/content-types/#typescript
+        "isolatedModules": true,
+        // "esModuleInterop": true,
+
+        // do not use with esbuild - https://esbuild.github.io/content-types/#no-type-system
+        // "emitDecoratorMetadata": false,
+        // "useDefineForClassFields": false, // set to false for esbuild
+        "target": "ESNext", // related to 'useDefineForClassFields'
+
+        ////// all others - esbuild does not look at these
+        //// others - compile
+        "noEmit": true,
+        "module": "NodeNext",
+        // "moduleDetection": "force",
+        "moduleResolution": "NodeNext",
+        "lib": [ "ESNext", "DOM" ],
+        "outDir": "out",
+        // "rootDir": "src",
+        "sourceMap": true,
+        "allowSyntheticDefaultImports": true,
+        "moduleDetection": "force",
+        // "baseUrl": ,
+        // "sourceRoot": "src",
+        // "incremental": true,
+
+        //// others - lint
+        // "exactOptionalPropertyTypes": true,
+        "forceConsistentCasingInFileNames": true,
+        "maxNodeModuleJsDepth": 4,
+        "allowJs": true,
+        // "noFallthroughCasesInSwitch": true,
+        // "noImplicitAny": true,
+        // "noImplicitOverride": true,
+        // "noImplicitReturns": true,
+        // "noImplicitThis": true,
+        "noUnusedLocals": true,
+        // "noUnusedParameters": true,
+        // "removeComments": true,
+		// "skipLibCheck": true,
+        // "strictFunctionTypes": true,
+        // "strictNullChecks": true,
+        // "strictPropertyInitialization": true,
+        // "traceResolution": true,
+
+
+
+    },
+    "include": [
+        "src/**/*.ts",
+        "node_modules/mocha/**/*",
+        "node_modules/nyc/**/*"
+    ],
+    // "include": [
+    //     "src/"
+    // ],
+    "exclude": [
+        "./dist",
+        "./dummy-ext",
+        ".node_modules",
+        "./out",
+        "./out_ts",
+        "./.vscode-test"
+    ],
+
+    // "typeAcquisition": {
+    //     "enable": false
+    // }
 }

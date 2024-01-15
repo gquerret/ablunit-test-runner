@@ -64,34 +64,46 @@
 		"progress software",
 		"progress"
 	],
+	"engines-2": {
+		"vscode": "^1.83.0",
+		"node": "^16.18.34"
+	},
 	"engines": {
 		"vscode": "^1.83.0"
 	},
 	"categories": [
 		"Testing"
 	],
-	"activationEvents-other": [
-		"onStartupFinished",
-		"workspaceContains:{**/*.cls,**/*.p,.vscode/ablunit-test-profile.json}"
-	],
 	"activationEvents": [
 		"onStartupFinished"
 	],
 	"main": "./out/extension",
+	"directories": {
+		"extension": "src",
+		"test": "src/test"
+	},
 	"scripts": {
 		"build": "npm run esbuild-base",
-		"watch": "npm run esbuild-base -- --watch",
 		"clean": "sh -c scripts/cleanup.sh",
+		"esbuild-base-2": "node .esbuild.config.mjs",
+		"esbuild-base": "esbuild ./src/*.ts ./src/**/*.ts ./src/test/suite/*.test.ts --source-root=./src --outdir=out --platform=node --format=cjs --target=ESNext --sourcemap --bundle --external:vscode --external:nyc --tsconfig=tsconfig.json",
+		"esbuild-base-5": "esbuild ./src/extension.ts ./src/test/index.ts ./src/test/runTest.ts ./src/test/*.ts ./src/test/suite/*.test.ts --outdir=out --platform=node --format=cjs --target=ESNext --sourcemap --bundle --external:vscode --external:mocha --external:nyc --tsconfig=tsconfig.json",
+		"esbuild-base-4": "esbuild ./src/extension.ts ./src/test/index.ts ./src/test/runTest.ts ./src/test/*.ts --outdir=out --platform=node --format=cjs --target=ES2019 --sourcemap --bundle --external:vscode --external:mocha --external:nyc --tsconfig=tsconfig.json",
+		"esbuild-base-3": "esbuild ./src/extension.ts ./src/test/index.ts ./src/test/runTest.ts ./src/test/*.ts --outdir=out --platform=node --format=cjs --target=ES2019 --sourcemap --source-root=src --bundle --external:vscode --external:mocha --external:nyc --tsconfig=tsconfig.json",
+		"esbuild-base-bundle": "esbuild ./src/extension.ts ./src/test/index.ts ./src/test/runTest.ts ./src/test/*.ts --outdir=out --platform=node --format=cjs --target=ES2019 --sourcemap --source-root=. --bundle --external:vscode",
+		"esbuild-analyze": "npm run esbuild-base -- --analyze",
+		"esbuild-base-old": "esbuild src/*.ts src/**/*.ts src/**/**/*.ts --outdir=out --platform=node --format=cjs --sourcemap",
+		"esbuild-test-old": "node .esbuild.test.config.ts",
+		"esbuild-bundle-old": "rm -rf out && esbuild ./src/extension.ts --outfile=./out/extension.js --platform=node --format=cjs --bundle --minify --external:vscode --sourcemap",
 		"lint": "npx eslint . --ext .ts,.js",
-		"esbuild-base": "esbuild src/*.ts src/**/*.ts src/**/**/*.ts --outdir=out --platform=node --format=cjs --sourcemap",
-		"esbuild-test": "node .esbuild.test.config.ts",
-		"esbuild-bundle": "rm -rf out && esbuild ./src/extension.ts --outfile=./out/extension.js --platform=node --format=cjs --bundle --minify --external:vscode --sourcemap",
 		"pretest": "npm run test:setup && npm run build",
+		"test:install-and-run-nopack": "cd dummy-ext && npm run test:install-and-run",
+		"test:install-and-run": "npm run package && cd dummy-ext && npm run test:install-and-run",
 		"test:setup": "sh -c test_projects/setup.sh",
 		"test": "node ./out/test/runTest.js",
-		"test:install-and-run": "npm run package && cd dummy-ext && npm run test:install-and-run",
-		"test:install-and-run-nopack": "cd dummy-ext && npm run test:install-and-run",
-		"vscode:prepublish": "npm run esbuild-bundle"
+		"tsc-noemit": "npm run tsc -noEmit",
+		"vscode:prepublish": "npm run esbuild-base -- --minify",
+		"watch": "npm run esbuild-base -- --watch"
 	},
 	"dependencies": {
 		"node-json-minify": "^3.0.0",
@@ -99,7 +111,6 @@
 	},
 	"devDependencies": {
 		"@types/glob": "^8.1.0",
-		"@types/mocha": "^10.0.6",
 		"@types/node": "^16.18.34",
 		"@types/vscode": "^1.83.0",
 		"@types/xml2js": "^0.4.14",
@@ -107,12 +118,13 @@
 		"@typescript-eslint/parser": "^6.13.2",
 		"@vscode/test-cli": "^0.0.4",
 		"@vscode/test-electron": "^2.3.8",
-		"esbuild": "^0.19.8",
+		"esbuild": "^0.19.11",
 		"eslint": "^8.55.0",
 		"mocha": "^10.2.0",
 		"mocha-junit-reporter": "^2.2.1",
 		"mocha-multi-reporters": "^1.5.1",
-		"nyc": "^15.1.0"
+		"nyc": "^15.1.0",
+		"vscode-test": "^1.6.1"
 	},
 	"contributes": {
 		"configuration": {
@@ -207,5 +219,9 @@
 				"path": "./snippets/snippets-abl-class.json"
 			}
 		]
-	}
+	},
+	"bundleDependencies": [
+		"node-json-minify",
+		"xml2js"
+	]
 }
